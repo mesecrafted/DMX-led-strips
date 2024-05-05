@@ -16,17 +16,24 @@
 #include <esp_dmx.h>
 #include <Adafruit_NeoPixel.h>
 //neopixel values
-#define LED_PIN 13
-#define LED_COUNT 144
+#define LED_PIN1 13
+#define LED_PIN2 12
+#define LED_COUNT 142
 
+int start_addr = 360;
+int group_size = 10;
+
+//Define tasks for multithreading
 TaskHandle_t DMX_loop;
 TaskHandle_t LED_loop;
 
+//define the thread functions ahead of time for compiling
 void DMX_Loop_Func(void * pvParameters);
 void LED_Loop_Func(void * pvParameters);
 
-//define neopixel strip object
-Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+//define neopixel strip objects
+Adafruit_NeoPixel strip1(LED_COUNT, LED_PIN1, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip2(LED_COUNT, LED_PIN2, NEO_GRB + NEO_KHZ800);
 
 /* First, lets define the hardware pins that we are using with our ESP32. We
   need to define which pin is transmitting data and which pin is receiving data.
@@ -54,16 +61,20 @@ byte data[DMX_PACKET_SIZE];
   also to update our packet and print to the Serial Monitor at regular
   intervals. */
 bool dmxIsConnected = false;
-unsigned long lastUpdate = millis();
+//unsigned long lastUpdate = millis();
 
 void setup() {
   /* Start the serial connection back to the computer so that we can log
     messages to the Serial Monitor. Lets set the baud rate to 115200. */
+  //115200 caused errors in the serial monitor. I didn't bother to troubleshoot why. 
   Serial.begin(9600);
 
   /*begin a nepixel strip*/
-  strip.begin();           // Initialize NeoPixel object
-  strip.setBrightness(255); // Set BRIGHTNESS to about 4% (max = 255)
+  strip1.begin();           // Initialize NeoPixel object
+  strip1.setBrightness(255); // Brightness 0-255
+  strip2.begin();
+  strip2.setBrightness(255);
+
 
   /* Now we will install the DMX driver! We'll tell it which DMX port to use,
     what device configuration to use, and what DMX personalities it should have.
@@ -92,7 +103,7 @@ void setup() {
     NULL,        /* parameter of the task */
     1,           /* priority of the task */
     &DMX_loop,      /* Task handle to keep track of created task */
-    1);          /* pin task to core 0 */
+    1);          /* pin task to core 1 */
   delay(500);
 
   xTaskCreatePinnedToCore(
@@ -107,7 +118,7 @@ void setup() {
 }
 
 void DMX_Loop_Func(void * pvParameters) {
-  for( ;; ){
+  for( ;; ){ //without a loop the esp crashes
     /* We need a place to store information about the DMX packets we receive. We
       will use a dmx_packet_t to store that packet information.  */
     dmx_packet_t packet;
@@ -136,17 +147,7 @@ void DMX_Loop_Func(void * pvParameters) {
           that we can print it out. */
         dmx_read(dmxPort, data, packet.size);
 
-        /*strip.clear(); // Set all pixel colors to 'off'
-
-        // The first NeoPixel in a strand is #0, second is 1, all the way up
-        // to the count of pixels minus one.
-        for(int i=0; i<LED_COUNT; i++) {
-          // Set the i-th LED to pure green:
-          strip.setPixelColor(i, data[1], data[2], data[3]);
-        }
-        
-        strip.show();*/
-        
+        //removed LED code from here and put it in the other thread        
 
         /*if (now - lastUpdate > 10) {
           Serial.printf("Start code is 0x%02X and slot 1 is 0x%02X\n", data[0],
@@ -163,30 +164,35 @@ void DMX_Loop_Func(void * pvParameters) {
     } else if (dmxIsConnected) {
       /* If DMX times out after having been connected, it likely means that the
         DMX cable was unplugged. When that happens in this example sketch, we'll
-        uninstall the DMX driver. */
+        uninstall the DMX driver. No we won't not sure if I should do this differently, but I got rid of this*/
       Serial.println("DMX was disconnected.");
+      dmxIsConnected = false;
       //dmx_driver_delete(dmxPort);
 
       /* Stop the program. */
       //while (true) yield();
     }
-    
-    Serial.write("l");
   }
 }
 
 void LED_Loop_Func(void * pvParameters) {
   for(;;) {
-    strip.clear(); // Set all pixel colors to 'off'
+    strip1.clear(); // Set all pixel colors to 'off'
+    strip2.clear();
 
     // The first NeoPixel in a strand is #0, second is 1, all the way up
     // to the count of pixels minus one.
     for(int i=0; i<LED_COUNT; i++) {
       // Set the i-th LED to pure green:
-      strip.setPixelColor(i, data[((i+1)*3)-2], data[((i+1)*3)-1], data[((i+1)*3)]);
+      //strip.setPixelColor(i, data[((i+1)*3)-2], data[((i+1)*3)-1], data[((i+1)*3)]);
+      //strip1.setPixelColor(i,data[436],data[437],data[438]);
+      //strip2.setPixelColor(i,data[436],data[437],data[438]);
+      //start_addr+(floor(i/group_size))
+      strip1.setPixelColor(i,data[start_addr+floor(i/group_size)],data[start_addr+floor(i/group_size)+1],data[start_addr+floor(i/group_size)+2]);
     }
         
-    strip.show();
+    strip1.show();
+    strip2.show();
   }
 }
 
