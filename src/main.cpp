@@ -16,12 +16,11 @@
 #include <esp_dmx.h>
 #include <Adafruit_NeoPixel.h>
 //neopixel values
-#define LED_PIN1 13
-#define LED_PIN2 12
-#define LED_COUNT 142
-
-int start_addr = 360;
-int group_size = 10;
+#define LED_PIN1 13 // The pin used for strip 1
+#define LED_PIN2 12 // The pin used for strip 2
+#define LED_COUNT 142 // Number of LED chips in a strip
+#define GROUP_SIZE 10 // LED_COUNT / # of groups
+#define START_ADDR 300
 
 //Define tasks for multithreading
 TaskHandle_t DMX_loop;
@@ -66,10 +65,10 @@ bool dmxIsConnected = false;
 void setup() {
   /* Start the serial connection back to the computer so that we can log
     messages to the Serial Monitor. Lets set the baud rate to 115200. */
-  //115200 caused errors in the serial monitor. I didn't bother to troubleshoot why. 
+  //115200 caused errors in the serial monitor. I didn't bother to troubleshoot why; I have no reason to used such a high rate. 
   Serial.begin(9600);
 
-  /*begin a nepixel strip*/
+  /* begin the nepixel strips */
   strip1.begin();           // Initialize NeoPixel object
   strip1.setBrightness(255); // Brightness 0-255
   strip2.begin();
@@ -149,11 +148,14 @@ void DMX_Loop_Func(void * pvParameters) {
 
         //removed LED code from here and put it in the other thread        
 
-        /*if (now - lastUpdate > 10) {
+        /* // The following code is to send periodical messages to the serial monitor (I broke it in the process of disabling it)
+        if (now - lastUpdate > 10) {
           Serial.printf("Start code is 0x%02X and slot 1 is 0x%02X\n", data[0],
                         data[1]);
           lastUpdate = now;
-        }*/
+        }
+        */
+
       } else {
         /* Oops! A DMX error occurred! Don't worry, this can happen when you first
           connect or disconnect your DMX devices. If you are consistently getting
@@ -167,8 +169,7 @@ void DMX_Loop_Func(void * pvParameters) {
         uninstall the DMX driver. No we won't not sure if I should do this differently, but I got rid of this*/
       Serial.println("DMX was disconnected.");
       dmxIsConnected = false;
-      //dmx_driver_delete(dmxPort);
-
+      //dmx_driver_delete(dmxPort); // I want the driver to stay just to be safe
       /* Stop the program. */
       //while (true) yield();
     }
@@ -183,12 +184,9 @@ void LED_Loop_Func(void * pvParameters) {
     // The first NeoPixel in a strand is #0, second is 1, all the way up
     // to the count of pixels minus one.
     for(int i=0; i<LED_COUNT; i++) {
-      // Set the i-th LED to pure green:
-      //strip.setPixelColor(i, data[((i+1)*3)-2], data[((i+1)*3)-1], data[((i+1)*3)]);
-      //strip1.setPixelColor(i,data[436],data[437],data[438]);
-      //strip2.setPixelColor(i,data[436],data[437],data[438]);
-      //start_addr+(floor(i/group_size))
-      strip1.setPixelColor(i,data[start_addr+floor(i/group_size)],data[start_addr+floor(i/group_size)+1],data[start_addr+floor(i/group_size)+2]);
+      /* You would change the multiplier if each led had more channels. ex: RGBW led would use "* 4" instead of "* 3" */
+      int group_offset = START_ADDR + (i/GROUP_SIZE) * 3;
+      strip1.setPixelColor( i, group_offset, group_offset + 1, group_offset + 2 );
     }
         
     strip1.show();
