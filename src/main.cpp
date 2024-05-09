@@ -18,6 +18,7 @@
 //neopixel values
 #define LED_PIN 13
 #define LED_COUNT 144
+#define START_ADDR 436
 
 TaskHandle_t DMX_loop;
 TaskHandle_t LED_loop;
@@ -183,7 +184,7 @@ void LED_Loop_Func(void * pvParameters) {
     // to the count of pixels minus one.
     for(int i=0; i<LED_COUNT; i++) {
       // Set the i-th LED to pure green:
-      strip.setPixelColor(i, data[((i+1)*3)-2], data[((i+1)*3)-1], data[((i+1)*3)]);
+      strip.setPixelColor(i, data[START_ADDR], data[START_ADDR+1], data[START_ADDR+2]);
     }
         
     strip.show();
