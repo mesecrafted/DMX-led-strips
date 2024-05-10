@@ -16,8 +16,9 @@
 #include <esp_dmx.h>
 #include <Adafruit_NeoPixel.h>
 //neopixel values
-#define LED_PIN 13
-#define LED_COUNT 144
+#define LED_PIN1 13
+#define LED_PIN2 12
+#define LED_COUNT 142
 #define START_ADDR 436
 
 TaskHandle_t DMX_loop;
@@ -27,7 +28,8 @@ void DMX_Loop_Func(void * pvParameters);
 void LED_Loop_Func(void * pvParameters);
 
 //define neopixel strip object
-Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip1(LED_COUNT, LED_PIN1, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip2(LED_COUNT, LED_PIN2, NEO_GRB + NEO_KHZ800);
 
 /* First, lets define the hardware pins that we are using with our ESP32. We
   need to define which pin is transmitting data and which pin is receiving data.
@@ -63,8 +65,10 @@ void setup() {
   Serial.begin(9600);
 
   /*begin a nepixel strip*/
-  strip.begin();           // Initialize NeoPixel object
-  strip.setBrightness(255); // Set BRIGHTNESS to about 4% (max = 255)
+  strip1.begin();           // Initialize NeoPixel object
+  strip1.setBrightness(255); // Set BRIGHTNESS to about 4% (max = 255)
+  strip2.begin();           // Initialize NeoPixel object
+  strip2.setBrightness(255); // Set BRIGHTNESS to about 4% (max = 255)
 
   /* Now we will install the DMX driver! We'll tell it which DMX port to use,
     what device configuration to use, and what DMX personalities it should have.
@@ -178,16 +182,19 @@ void DMX_Loop_Func(void * pvParameters) {
 
 void LED_Loop_Func(void * pvParameters) {
   for(;;) {
-    strip.clear(); // Set all pixel colors to 'off'
+    strip1.clear(); // Set all pixel colors to 'off'
+    strip2.clear(); // Set all pixel colors to 'off'
 
     // The first NeoPixel in a strand is #0, second is 1, all the way up
     // to the count of pixels minus one.
     for(int i=0; i<LED_COUNT; i++) {
       // Set the i-th LED to pure green:
-      strip.setPixelColor(i, data[START_ADDR], data[START_ADDR+1], data[START_ADDR+2]);
+      strip1.setPixelColor(i, data[START_ADDR], data[START_ADDR+1], data[START_ADDR+2]);
+      strip2.setPixelColor(i, data[START_ADDR], data[START_ADDR+1], data[START_ADDR+2]);
     }
         
-    strip.show();
+    strip1.show();
+    strip2.show();
   }
 }
 
