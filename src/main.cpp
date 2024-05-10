@@ -19,8 +19,8 @@
 #define LED_PIN1 13 // The pin used for strip 1
 #define LED_PIN2 12 // The pin used for strip 2
 #define LED_COUNT 142 // Number of LED chips in a strip
-#define GROUP_SIZE 10 // LED_COUNT / # of groups
-#define START_ADDR 300
+#define GROUP_SIZE 9 // LED_COUNT / # of groups
+#define START_ADDR 139
 
 //Define tasks for multithreading
 TaskHandle_t DMX_loop;
@@ -186,7 +186,8 @@ void LED_Loop_Func(void * pvParameters) {
     for(int i=0; i<LED_COUNT; i++) {
       /* You would change the multiplier if each led had more channels. ex: RGBW led would use "* 4" instead of "* 3" */
       int group_offset = START_ADDR + (i/GROUP_SIZE) * 3;
-      strip1.setPixelColor( i, group_offset, group_offset + 1, group_offset + 2 );
+      strip1.setPixelColor( i, data[group_offset], data[group_offset + 1], data[group_offset + 2] );
+      strip2.setPixelColor( i, data[group_offset], data[group_offset + 1], data[group_offset + 2] );
     }
         
     strip1.show();
