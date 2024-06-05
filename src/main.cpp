@@ -1,14 +1,9 @@
 /*
 
-  DMX Read
+  DMX receive and translate to addressable RGB
 
-  This sketch allows you to read DMX from a DMX controller using a standard DMX
-  shield, such SparkFun ESP32 Thing Plus DMX to LED Shield. This sketch was
-  made for the Arduino framework!
-
-  Created 9 September 2021
-  By Mitch Weisbrod
-
+  Large portions of the DMX related code comes from the esp_dmx library example code
+  Created 9 September 2021 by Mitch Weisbrod under the MIT license
   https://github.com/someweisguy/esp_dmx
 
 */
@@ -20,7 +15,7 @@
 #define LED_PIN2 12 // The pin used for strip 2
 #define LED_COUNT 142 // Number of LED chips in a strip
 #define GROUP_SIZE 9 // LED_COUNT / # of groups
-#define START_ADDR 139 //DMX Start Address
+#define START_ADDR 440 //DMX Start Address (360)
 
 //Define tasks for multithreading
 TaskHandle_t DMX_loop;
@@ -169,6 +164,9 @@ void DMX_Loop_Func(void * pvParameters) {
         uninstall the DMX driver. No we won't not sure if I should do this differently, but I got rid of this*/
       Serial.println("DMX was disconnected.");
       dmxIsConnected = false;
+      for ( int i = 0; i <= 512; i++) {
+        data[i] = 0; 
+      }
       //dmx_driver_delete(dmxPort); // I want the driver to stay just to be safe
       /* Stop the program. */
       //while (true) yield();
