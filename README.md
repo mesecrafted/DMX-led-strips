@@ -12,11 +12,9 @@ Obviously you don't need to used these exact parts, but this is what I used
 - [Power supply]()
 - [XLR connectors]()
 - [Power connectors]()
-- [Enclosure]()
+- [Enclosure](https://a.co/d/8EDo1iI)
 
-## Downloading and compiling the code
-
-There are many ways to compile this code. You could even use Arduino IDE if you hate yourself, but I will outline what I used to get this done. 
+## Downloading and compiling the code 
 
 I used the VS Code IDE with the PlatformIO extention. This repo includes my `platformio.ini` file, so PlatformIO should automatically download the libraries you need. 
 
