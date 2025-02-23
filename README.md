@@ -6,12 +6,13 @@ This project was thought up to make custom led strip fixtures controllable with 
 
 Obviously you don't need to used these exact parts, but this is what I used
 
-- [ESP32]()
+- [ESP32](https://a.co/d/0fAkLVg)
 - [Level shifter](https://a.co/d/aY0sSCC)
-- [Addressable LEDs]()
-- [Power supply]()
+- [Addressable LEDs](https://a.co/d/81Wl8qD)
+- [Diffuser Channels](https://a.co/d/hbj3Ljh)
+- [Power supply](https://a.co/d/jcvAAeS)
 - [XLR connectors]()
-- [Power connectors]()
+- [Power connectors](https://a.co/d/3cF8bFB)
 - [Enclosure](https://a.co/d/8EDo1iI)
 
 ## Downloading and compiling the code 
