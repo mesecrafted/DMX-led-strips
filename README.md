@@ -1,6 +1,6 @@
 # DMX512 controlled LED strips
 
-This project makes custom addressable led strip fixtures controllable with DMX512. We used inexpensive parts to build a decent quality addressable LED fixture. 
+This project makes custom addressable LED strip fixtures controllable with DMX512. We used inexpensive parts to build a decent quality addressable LED fixture. 
 
 ## The hardware we used  
 
